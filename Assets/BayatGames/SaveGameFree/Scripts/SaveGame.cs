@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -41,12 +41,14 @@ namespace BayatGames.SaveGameFree
         /// <summary>
         /// Save handler.
         /// </summary>
-        public delegate void SaveHandler(object obj, string identifier, bool encode, string password, ISaveGameSerializer serializer, ISaveGameEncoder encoder, Encoding encoding, SaveGamePath path);
+        public delegate void SaveHandler(object obj, string identifier, bool encode, string password,
+         ISaveGameSerializer serializer, ISaveGameEncoder encoder, Encoding encoding, SaveGamePath path);
 
         /// <summary>
         /// Load handler.
         /// </summary>
-        public delegate void LoadHandler(object loadedObj, string identifier, bool encode, string password, ISaveGameSerializer serializer, ISaveGameEncoder encoder, Encoding encoding, SaveGamePath path);
+        public delegate void LoadHandler(object loadedObj, string identifier, bool encode, string password,
+         ISaveGameSerializer serializer, ISaveGameEncoder encoder, Encoding encoding, SaveGamePath path);
 
         /// <summary>
         /// Occurs when started saving.
@@ -78,13 +80,13 @@ namespace BayatGames.SaveGameFree
         /// </summary>
         public static LoadHandler LoadCallback;
 
-        private static ISaveGameSerializer m_Serializer = new SaveGameJsonSerializer();
-        private static ISaveGameEncoder m_Encoder = new SaveGameSimpleEncoder();
-        private static Encoding m_Encoding = Encoding.UTF8;
-        private static bool m_Encode = false;
-        private static SaveGamePath m_SavePath = SaveGamePath.PersistentDataPath;
-        private static string m_EncodePassword = "h@e#ll$o%^";
-        private static bool m_LogError = false;
+        private static ISaveGameSerializer serializer = new SaveGameJsonSerializer();
+        private static ISaveGameEncoder encoder = new SaveGameSimpleEncoder();
+        private static Encoding encoding = Encoding.UTF8;
+        private static bool doEncode = true;
+        private static SaveGamePath savePath = SaveGamePath.PersistentDataPath;
+        private static string encodePassword = "h@e#ll$o%^";
+        private static bool doLogError = false;
         private static bool usePlayerPrefs = false;
         private static List<string> ignoredFiles = new List<string>()
         {
@@ -104,15 +106,15 @@ namespace BayatGames.SaveGameFree
         {
             get
             {
-                if (m_Serializer == null)
+                if (serializer == null)
                 {
-                    m_Serializer = new SaveGameJsonSerializer();
+                    serializer = new SaveGameJsonSerializer();
                 }
-                return m_Serializer;
+                return serializer;
             }
             set
             {
-                m_Serializer = value;
+                serializer = value;
             }
         }
 
@@ -124,15 +126,15 @@ namespace BayatGames.SaveGameFree
         {
             get
             {
-                if (m_Encoder == null)
+                if (encoder == null)
                 {
-                    m_Encoder = new SaveGameSimpleEncoder();
+                    encoder = new SaveGameSimpleEncoder();
                 }
-                return m_Encoder;
+                return encoder;
             }
             set
             {
-                m_Encoder = value;
+                encoder = value;
             }
         }
 
@@ -144,15 +146,15 @@ namespace BayatGames.SaveGameFree
         {
             get
             {
-                if (m_Encoding == null)
+                if (encoding == null)
                 {
-                    m_Encoding = Encoding.UTF8;
+                    encoding = Encoding.UTF8;
                 }
-                return m_Encoding;
+                return encoding;
             }
             set
             {
-                m_Encoding = value;
+                encoding = value;
             }
         }
 
@@ -164,11 +166,11 @@ namespace BayatGames.SaveGameFree
         {
             get
             {
-                return m_Encode;
+                return doEncode;
             }
             set
             {
-                m_Encode = value;
+                doEncode = value;
             }
         }
 
@@ -180,11 +182,11 @@ namespace BayatGames.SaveGameFree
         {
             get
             {
-                return m_SavePath;
+                return savePath;
             }
             set
             {
-                m_SavePath = value;
+                savePath = value;
             }
         }
 
@@ -196,11 +198,11 @@ namespace BayatGames.SaveGameFree
         {
             get
             {
-                return m_EncodePassword;
+                return encodePassword;
             }
             set
             {
-                m_EncodePassword = value;
+                encodePassword = value;
             }
         }
 
@@ -210,14 +212,8 @@ namespace BayatGames.SaveGameFree
         /// <value><c>true</c> if log error; otherwise, <c>false</c>.</value>
         public static bool LogError
         {
-            get
-            {
-                return m_LogError;
-            }
-            set
-            {
-                m_LogError = value;
-            }
+            get => doLogError;
+            set => doLogError = value;
         }
 
         /// <summary>
@@ -225,37 +221,19 @@ namespace BayatGames.SaveGameFree
         /// </summary>
         public static bool UsePlayerPrefs
         {
-            get
-            {
-                return usePlayerPrefs;
-            }
-            set
-            {
-                usePlayerPrefs = value;
-            }
+            get => usePlayerPrefs;
+            set => usePlayerPrefs = value;
         }
 
         /// <summary>
         /// Gets the list of ignored files.
         /// </summary>
-        public static List<string> IgnoredFiles
-        {
-            get
-            {
-                return ignoredFiles;
-            }
-        }
+        public static List<string> IgnoredFiles => ignoredFiles;
 
         /// <summary>
         /// Gets the list of ignored directories.
         /// </summary>
-        public static List<string> IgnoredDirectories
-        {
-            get
-            {
-                return ignoredDirectories;
-            }
-        }
+        public static List<string> IgnoredDirectories => ignoredDirectories;
 
         /// <summary>
         /// Saves data using the identifier.
@@ -352,7 +330,8 @@ namespace BayatGames.SaveGameFree
         /// <param name="encoding">Encoding.</param>
         /// <param name="path">Path.</param>
         /// <typeparam name="T">The 1st type parameter.</typeparam>
-        public static void Save<T>(string identifier, T obj, bool encode, string password, ISaveGameSerializer serializer, ISaveGameEncoder encoder, Encoding encoding, SaveGamePath path)
+        public static void Save<T>(string identifier, T obj, bool encode, string password,
+        ISaveGameSerializer serializer, ISaveGameEncoder encoder, Encoding encoding, SaveGamePath path)
         {
             if (string.IsNullOrEmpty(identifier))
             {
@@ -370,36 +349,26 @@ namespace BayatGames.SaveGameFree
                     encoding,
                     path);
             }
-            if (serializer == null)
-            {
-                serializer = SaveGame.Serializer;
-            }
-            if (encoding == null)
-            {
-                encoding = SaveGame.DefaultEncoding;
-            }
+
+            serializer = serializer ?? SaveGame.Serializer;
+
+            encoding = encoding ?? SaveGame.DefaultEncoding;
+
             string filePath = "";
             if (!IsFilePath(identifier))
             {
-                switch (path)
-                {
-                    default:
-                    case SaveGamePath.PersistentDataPath:
-                        filePath = string.Format("{0}/{1}", Application.persistentDataPath, identifier);
-                        break;
-                    case SaveGamePath.DataPath:
-                        filePath = string.Format("{0}/{1}", Application.dataPath, identifier);
-                        break;
-                }
+                filePath = GetPath(path, identifier);
             }
             else
             {
                 filePath = identifier;
             }
+
             if (obj == null)
             {
                 obj = default(T);
             }
+
             Stream stream = null;
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             if (encode)
@@ -417,6 +386,7 @@ namespace BayatGames.SaveGameFree
                     stream = new MemoryStream();
                 }
             }
+
             serializer.Serialize(obj, stream, encoding);
             if (encode)
             {
@@ -439,6 +409,7 @@ namespace BayatGames.SaveGameFree
                 PlayerPrefs.Save();
             }
             stream.Dispose();
+
             if (SaveCallback != null)
             {
                 SaveCallback.Invoke(
@@ -643,32 +614,17 @@ namespace BayatGames.SaveGameFree
                     encoding,
                     path);
             }
-            if (serializer == null)
-            {
-                serializer = SaveGame.Serializer;
-            }
-            if (encoding == null)
-            {
-                encoding = SaveGame.DefaultEncoding;
-            }
-            if (defaultValue == null)
-            {
-                defaultValue = default(T);
-            }
+            serializer = serializer ?? SaveGame.Serializer;
+
+            encoding = encoding ?? SaveGame.DefaultEncoding;
+
+            defaultValue = defaultValue ?? default(T);
+
             T result = defaultValue;
             string filePath = "";
             if (!IsFilePath(identifier))
             {
-                switch (path)
-                {
-                    default:
-                    case SaveGamePath.PersistentDataPath:
-                        filePath = string.Format("{0}/{1}", Application.persistentDataPath, identifier);
-                        break;
-                    case SaveGamePath.DataPath:
-                        filePath = string.Format("{0}/{1}", Application.dataPath, identifier);
-                        break;
-                }
+                filePath = GetPath(path, identifier);
             }
             else
             {
@@ -712,10 +668,12 @@ namespace BayatGames.SaveGameFree
             }
             result = serializer.Deserialize<T>(stream, encoding);
             stream.Dispose();
+
             if (result == null)
             {
                 result = defaultValue;
             }
+
             if (LoadCallback != null)
             {
                 LoadCallback.Invoke(
@@ -767,24 +725,10 @@ namespace BayatGames.SaveGameFree
             {
                 throw new System.ArgumentNullException("identifier");
             }
-            string filePath = "";
-            if (!IsFilePath(identifier))
-            {
-                switch (path)
-                {
-                    default:
-                    case SaveGamePath.PersistentDataPath:
-                        filePath = string.Format("{0}/{1}", Application.persistentDataPath, identifier);
-                        break;
-                    case SaveGamePath.DataPath:
-                        filePath = string.Format("{0}/{1}", Application.dataPath, identifier);
-                        break;
-                }
-            }
-            else
-            {
-                filePath = identifier;
-            }
+
+
+            string filePath = IsFilePath(identifier) ? identifier : GetPath(path, identifier); 
+
             if (!usePlayerPrefs)
             {
                 bool exists = Directory.Exists(filePath);
@@ -821,6 +765,7 @@ namespace BayatGames.SaveGameFree
                 throw new System.ArgumentNullException("identifier");
             }
             string filePath = "";
+
             if (!IsFilePath(identifier))
             {
                 switch (path)
@@ -834,6 +779,7 @@ namespace BayatGames.SaveGameFree
                         break;
                 }
             }
+            
             else
             {
                 filePath = identifier;
@@ -915,6 +861,7 @@ namespace BayatGames.SaveGameFree
                     }
                     files[i].Delete();
                 }
+
                 DirectoryInfo[] dirs = info.GetDirectories();
                 for (int i = 0; i < dirs.Length; i++)
                 {
@@ -965,16 +912,7 @@ namespace BayatGames.SaveGameFree
             string filePath = "";
             if (!IsFilePath(identifier))
             {
-                switch (path)
-                {
-                    default:
-                    case SaveGamePath.PersistentDataPath:
-                        filePath = string.Format("{0}/{1}", Application.persistentDataPath, identifier);
-                        break;
-                    case SaveGamePath.DataPath:
-                        filePath = string.Format("{0}/{1}", Application.dataPath, identifier);
-                        break;
-                }
+                filePath = GetPath(path, identifier);
             }
             else
             {
@@ -1018,30 +956,36 @@ namespace BayatGames.SaveGameFree
         /// <param name="identifier"></param>
         /// <param name="path"></param>
         /// <returns></returns>
+
+        private static string GetPath(SaveGamePath path, string identifier)
+        {
+            switch (path)
+            {
+                case SaveGamePath.PersistentDataPath:
+                    return string.Format("{0}/{1}", Application.persistentDataPath, identifier);
+                case SaveGamePath.DataPath:
+                    return string.Format("{0}/{1}", Application.dataPath, identifier);
+            }
+            return null;
+        }
+
         public static DirectoryInfo[] GetDirectories(string identifier, SaveGamePath path)
         {
             if (string.IsNullOrEmpty(identifier))
             {
                 identifier = string.Empty;
             }
+
             string filePath = "";
             if (!IsFilePath(identifier))
             {
-                switch (path)
-                {
-                    default:
-                    case SaveGamePath.PersistentDataPath:
-                        filePath = string.Format("{0}/{1}", Application.persistentDataPath, identifier);
-                        break;
-                    case SaveGamePath.DataPath:
-                        filePath = string.Format("{0}/{1}", Application.dataPath, identifier);
-                        break;
-                }
+                filePath = GetPath(path, identifier);
             }
             else
             {
                 filePath = identifier;
             }
+
             DirectoryInfo[] directories = new DirectoryInfo[0];
             if (!Exists(filePath, path))
             {
